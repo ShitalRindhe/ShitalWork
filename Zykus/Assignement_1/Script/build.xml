@@ -1,0 +1,105 @@
+<?xml version="1.0" ?> 
+<project default="dist" basedir=".">
+      
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="/usr/share/java/lib/ant-contrib-0.3.jar"/>
+		</classpath>
+	</taskdef>		
+	
+	<property file="..\project.properties" />
+
+
+	<path id="compile.classpath">
+		<fileset dir="WebContent/WEB-INF/lib">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+
+	<target name="clean">
+		<delete dir="dist" />
+		<delete dir="build" />
+	</target>
+	
+	<target name="init">
+		<mkdir dir="build/classes"/>
+		<mkdir dir="dist" />
+	</target>
+
+	
+	
+	<target name="Create_executable" >	
+		<property name="ExecutableName" value="${Executable_Name}" />  
+		<if>
+			<equals arg1="${ExecutableName}" arg2="jar"/>
+				<then>
+					<antcall target="Run_jar" />
+				</then>
+		<elseif>
+			<equals arg1="${ExecutableName}" arg2="war"/>
+				<then>
+					<antcall target="Run_war" />
+				</then>
+		</elseif>
+		<elseif>
+			<equals arg1="${ExecutableName}" arg2="ear"/>
+				<then>
+					<antcall target="Run_ear" />
+				</then>
+		</elseif>
+		</if> 	
+	</target>
+	
+<!-- ================================================================
+			war Section
+====================================================================-->
+	
+	<target name="compile">
+		<javac destdir="build/classes" debug="true" srcdir="src">
+			<classpath refid="compile.classpath"/>
+		</javac>
+	</target>
+	
+	<target name="Run_war" depends="Run_jar">
+	<echo> war created and successfully </echo>
+		<war destfile="dist/HelloWorld.war" webxml="WebContent/WEB-INF/web.xml">
+			<fileset dir="WebContent"/>
+			<lib dir="WebContent/WEB-INF/lib"/>
+			<classes dir="build/classes"/>
+		</war>
+	</target>
+	
+<!-- ================================================================
+			jar Section
+====================================================================-->
+	
+	<target name="Run_jar">
+	<echo> jar created and successfully </echo>
+	    <jar destfile="dist/HelloWorld.jar" basedir="build/classes" />
+	</target>
+	
+	<target name="execute">
+	<echo> Code executed successfully </echo>
+		<java classname="com.shital.helloworld.HelloWorld" classpath="build/classes" />
+	</target>
+
+	
+<!-- ================================================================
+			ear Section
+====================================================================-->
+    <target name="Run_ear" depends="Run_war" >
+	<echo> jar created and successfully </echo>
+      <ear destfile="dist/HelloWorld.ear" appxml="WebContent/META-INF/application.xml">  
+           <metainf dir="WebContent/META-INF"/> 
+           <fileset dir="dist" includes="*.jar,*.war"/>
+      </ear>
+    </target>
+	
+<!-- ================================================================
+			Target Section
+====================================================================-->		
+
+	<target name="dist" depends="clean,init,compile,Create_executable,execute">
+	</target>
+	
+</project>
